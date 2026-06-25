@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Rock+Salt&family=Bebas+Neue&family=Oswald:wght@500;600;700&family=Permanent+Marker&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;}
+body{font-family:'Poppins',system-ui,-apple-system,sans-serif;background:#fff;color:#141414;-webkit-font-smoothing:antialiased;}
+textarea,select,button{font-family:inherit;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-440px 0}100%{background-position:440px 0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.scl::-webkit-scrollbar{width:8px;height:10px}
+.scl::-webkit-scrollbar-thumb{background:#d4d6da;border-radius:8px}
+.scl::-webkit-scrollbar-track{background:transparent}
+</style>
+<script src="models.js"></script>
+<script src="photobooth-styles.js"></script>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;background:{{ appBg }};">
+
+  <main style="flex:1;min-height:0;">
+
+    <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
+      <div style="height:100%;display:flex;gap:24px;padding:26px 36px;">
+
+        <div onDrop="{{ onDrop }}" onDragOver="{{ onDragOver }}" style="flex:1;min-width:0;background:linear-gradient(180deg,#f6faff 0%,#ffffff 40%);border:1px solid #eef1f5;border-radius:24px;box-shadow:0 1px 2px rgba(20,30,60,.04),0 26px 64px -36px rgba(40,80,170,.22);padding:26px;display:flex;flex-direction:column;">
+          <input type="file" accept="image/*" ref="{{ fileInputRef }}" onChange="{{ onFile }}" style="display:none" />
+
+          <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;">
+
+            <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ false }}">
+              <div style="position:relative;max-width:100%;max-height:100%;display:flex;align-items:center;justify-content:center;">
+                {{ imageEl }}
+                <button onClick="{{ removeImage }}" style="position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.94);box-shadow:0 2px 10px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showCamera }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;">
+                <video ref="{{ attachVideo }}" style="max-width:100%;max-height:62vh;border-radius:16px;background:#000;"></video>
+                <div style="display:flex;gap:12px;">
+                  <button onClick="{{ capture }}" style="padding:12px 26px;border-radius:12px;border:none;background:#16181a;color:#fff;font-size:14.5px;font-weight:600;cursor:pointer;">Capture</button>
+                  <button onClick="{{ cancelCamera }}" style="padding:12px 22px;border-radius:12px;border:1px solid #dfe2e6;background:#fff;color:#141414;font-size:14.5px;font-weight:500;cursor:pointer;">Cancel</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showUploadPrompt }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <div style="font-size:16px;color:#7c8088;">Start camera, upload a photo, or drag and drop an image.</div>
+                <div style="display:flex;gap:14px;margin-top:6px;">
+                  <button onClick="{{ startCamera }}" style="display:flex;align-items:center;gap:9px;padding:12px 20px;border-radius:12px;border:1px solid #dfe2e6;background:#fff;font-size:14.5px;font-weight:500;color:#141414;cursor:pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Start Camera
+                  </button>
+                  <button onClick="{{ triggerUpload }}" style="display:flex;align-items:center;gap:9px;padding:12px 20px;border-radius:12px;border:none;background:#f1f2f4;font-size:14.5px;font-weight:500;color:#141414;cursor:pointer;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    Upload Photo
+                  </button>
+                </div>
+                <div style="display:flex;gap:34px;margin-top:14px;text-align:left;color:#141414;font-size:13.5px;font-weight:700;line-height:1.7;">
+                  <div>
+                    <div>1. Add a Photo or Take an image</div>
+                    <div>2. Choose a style and click INK ME UP</div>
+                  </div>
+                  <div style="align-self:center;font-weight:700;color:#9aa0a6;">OR</div>
+                  <div>
+                    <div>1. Add a Photo or Take an image</div>
+                    <div>2. Write your PROMPT below and click INK ME UP</div>
+                  </div>
+                </div>
+                <sc-if value="{{ cameraError }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;color:#c0392b;max-width:320px;">{{ cameraError }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+          </div>
+
+          <div style="flex:none;margin-top:18px;border-top:1px solid #eef0f3;padding-top:16px;">
+            <textarea value="{{ prompt }}" onChange="{{ onPrompt }}" placeholder="Leave this empty to pick one preset on the right." style="width:100%;min-height:58px;max-height:130px;resize:vertical;border:1px solid #e6e8ec;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45;color:#141414;outline:none;background:#fff;"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:10px;">
+              <span style="flex:1;text-align:center;font-size:12.5px;color:{{ noticeColor }};font-weight:{{ noticeWeight }};">{{ noticeText }}</span>
+              <sc-if value="{{ true }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;align-items:center;gap:8px;flex:none;">
+                  <span style="font-size:12.5px;color:#7c8088;font-weight:500;">Outputs</span>
+                  <button onClick="{{ decOut }}" style="width:30px;height:30px;border-radius:9px;border:1px solid #e2e4e8;background:#fff;font-size:18px;line-height:1;color:#141414;cursor:pointer;display:flex;align-items:center;justify-content:center;">–</button>
+                  <span style="min-width:20px;text-align:center;font-weight:600;font-size:14px;">{{ outputs }}</span>
+                  <button onClick="{{ incOut }}" style="width:30px;height:30px;border-radius:9px;border:1px solid #e2e4e8;background:#fff;font-size:17px;line-height:1;color:#141414;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div style="width:362px;flex:none;display:flex;flex-direction:column;gap:14px;">
+          <div class="scl" style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:10px;padding-right:6px;">
+            <sc-for list="{{ styleCards }}" as="st" hint-placeholder-count="6">
+              <div onClick="{{ st.toggle }}" style="flex:none;padding:13px 15px;border-radius:14px;cursor:pointer;transition:background .14s,border-color .14s,box-shadow .14s;background:{{ st.bg }};border:{{ st.border }};box-shadow:{{ st.shadow }};opacity:{{ st.opacity }};pointer-events:{{ st.pe }};">
+                <div style="font-size:14.5px;font-weight:600;color:{{ st.titleColor }};font-family:{{ st.font }};margin-bottom:3px;">{{ st.label }}</div>
+                <div style="font-size:12.5px;line-height:1.45;color:{{ st.descColor }};">{{ st.description }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="flex:none;display:flex;flex-direction:column;gap:11px;">
+            <button onClick="{{ generate }}" disabled="{{ generateDisabled }}" style="width:100%;display:flex;align-items:center;justify-content:center;border:none;border-radius:{{ genRadius }};padding:{{ genPad }};line-height:1.1;font-family:{{ genFont }};font-size:15.5px;font-weight:600;color:{{ genTextColor }};background:{{ genBg }};cursor:{{ genCursor }};transition:background .15s;">{{ genLabel }}</button>
+          </div>
+        </div>
+
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isResults }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;padding:24px 36px 28px;">
+        <sc-if value="{{ genMessage }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;margin-bottom:16px;text-align:center;font-size:15px;font-weight:600;color:#141414;">{{ genMessage }}</div>
+        </sc-if>
+        <div class="scl" style="flex:1;min-height:0;display:flex;gap:24px;overflow-x:auto;overflow-y:hidden;align-items:stretch;padding:6px 2px 14px;">
+          <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+            <div style="flex:none;width:322px;height:100%;display:flex;flex-direction:column;background:#fff;border:1px solid #ececef;border-radius:18px;overflow:hidden;box-shadow:0 12px 32px -20px rgba(0,0,0,.28);animation:fadeUp .4s ease both;">
+              <div style="flex:1;min-height:0;position:relative;background:#f3f3f4;">
+                <sc-if value="{{ r.loading }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:absolute;inset:0;background:linear-gradient(110deg,#ececec 8%,#f6f6f6 18%,#ececec 33%);background-size:440px 100%;animation:shimmer 1.4s infinite linear;display:flex;align-items:center;justify-content:center;">
+                    <div style="width:42px;height:42px;border-radius:50%;border:3px solid #dadadd;border-top-color:#a9abb0;animation:spin .9s linear infinite;"></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ r.done }}" hint-placeholder-val="{{ false }}">
+                  {{ r.imgEl }}
+                </sc-if>
+              </div>
+              <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;">
+                <span style="font-size:16px;font-weight:600;color:#141414;">{{ r.label }}</span>
+                <button onClick="{{ r.download }}" style="display:flex;align-items:center;gap:7px;background:none;border:none;font-size:14px;font-weight:500;color:#141414;cursor:pointer;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download
+                </button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="flex:none;display:flex;justify-content:center;padding-top:20px;">
+          <button onClick="{{ createAnother }}" style="border:none;border-radius:999px;padding:15px 34px;font-size:15.5px;font-weight:600;color:#fff;background:{{ genBgSolid }};cursor:pointer;">Create another set</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ secretModal }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSecretModal }}" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;">
+        <div onClick="{{ lbStop }}" style="width:340px;max-width:100%;background:#fff;border-radius:18px;padding:26px 24px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45);">
+          <div style="font-size:17px;font-weight:700;color:#141414;margin-bottom:4px;">Restricted</div>
+          <div style="font-size:13px;color:#8b8f96;margin-bottom:16px;">Enter password to continue.</div>
+          <input type="password" value="{{ secretPwd }}" onInput="{{ onSecretPwd }}" onKeyDown="{{ secretKey }}" placeholder="Password" autoFocus="{{ true }}" style="width:100%;box-sizing:border-box;border:1px solid #e2e4e8;border-radius:11px;padding:12px 14px;font-size:14px;color:#141414;outline:none;" />
+          <sc-if value="{{ secretError }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;color:#c0392b;margin-top:8px;">{{ secretError }}</div>
+          </sc-if>
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button onClick="{{ closeSecretModal }}" style="flex:1;border:1px solid #e2e4e8;background:#fff;border-radius:11px;padding:11px;font-size:14px;font-weight:500;color:#141414;cursor:pointer;">Cancel</button>
+            <button onClick="{{ submitSecret }}" style="flex:1;border:none;background:#16181a;border-radius:11px;padding:11px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;">Enter</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ secretPage }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;inset:0;background:#0f1012;z-index:1100;display:flex;flex-direction:column;color:#fff;">
+        <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:18px 26px;border-bottom:1px solid #23262b;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="font-size:11px;letter-spacing:.16em;color:#7c8088;font-weight:600;">ADMIN CONSOLE</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <sc-if value="{{ adminSaved }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:12.5px;color:#43c478;font-weight:600;">Saved ✓</span>
+            </sc-if>
+            <sc-if value="{{ adminError }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:12.5px;color:#e2706f;font-weight:600;max-width:340px;">{{ adminError }}</span>
+            </sc-if>
+            <button onClick="{{ saveAdmin }}" style="border:none;background:#fff;color:#16181a;border-radius:10px;padding:9px 20px;font-size:13.5px;font-weight:700;cursor:pointer;">{{ saveLabel }}</button>
+            <button onClick="{{ exitSecretPage }}" style="border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff;border-radius:10px;padding:9px 16px;font-size:13.5px;font-weight:500;cursor:pointer;">Exit</button>
+          </div>
+        </div>
+
+        <div style="flex:none;display:flex;gap:6px;padding:14px 26px 0;">
+          <button onClick="{{ tabStyles }}" style="border:none;background:{{ stylesTabBg }};color:{{ stylesTabColor }};border-radius:9px 9px 0 0;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;">Styles</button>
+          <button onClick="{{ tabAppearance }}" style="border:none;background:{{ appearanceTabBg }};color:{{ appearanceTabColor }};border-radius:9px 9px 0 0;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;">Appearance</button>
+          <button onClick="{{ tabSecurity }}" style="border:none;background:{{ securityTabBg }};color:{{ securityTabColor }};border-radius:9px 9px 0 0;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;">Security</button>
+        </div>
+
+        <div class="scl" style="flex:1;min-height:0;overflow-y:auto;padding:24px 26px 40px;background:#16181a;">
+
+          <sc-if value="{{ adminStylesTab }}" hint-placeholder-val="{{ true }}">
+            <div style="max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+              <div style="font-size:14px;color:#9498a0;line-height:1.5;">The full styles list as JSON — same shape as the data file (<span style="font-family:ui-monospace,monospace;color:#cfd2d6;">id, label, description, prompt</span>). Edit freely, then Save. Each entry needs at least an <span style="font-family:ui-monospace,monospace;color:#cfd2d6;">id</span> and <span style="font-family:ui-monospace,monospace;color:#cfd2d6;">label</span>.</div>
+              <textarea value="{{ stylesJson }}" onInput="{{ onStylesJson }}" spellcheck="false" style="width:100%;box-sizing:border-box;min-height:62vh;background:#0f1012;border:1px solid #2e3238;border-radius:12px;padding:16px;font-size:12.5px;line-height:1.6;color:#cfd2d6;outline:none;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:2;"></textarea>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ adminAppearanceTab }}" hint-placeholder-val="{{ false }}">
+            <div style="max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:30px;">
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;">Page background</div>
+                <div style="display:flex;gap:8px;margin-bottom:14px;">
+                  <button onClick="{{ setBgColorMode }}" style="border:1px solid #2e3238;border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ bgColorModeBg }};color:{{ bgColorModeColor }};">Color</button>
+                  <button onClick="{{ setBgImageMode }}" style="border:1px solid #2e3238;border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ bgImageModeBg }};color:{{ bgImageModeColor }};">Image</button>
+                </div>
+                <sc-if value="{{ adminBgIsColor }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <input type="color" value="{{ adminBgColor }}" onInput="{{ onAdminBgColor }}" style="width:46px;height:36px;border:none;background:none;cursor:pointer;" />
+                    <input value="{{ adminBgColor }}" onInput="{{ onAdminBgColor }}" style="width:120px;background:#0f1012;border:1px solid #2e3238;border-radius:9px;padding:9px 12px;font-size:13px;color:#fff;outline:none;font-family:ui-monospace,monospace;" />
+                  </div>
+                </sc-if>
+                <sc-if value="{{ adminBgIsImage }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <label style="border:1px dashed #3a3e44;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;">Upload image<input type="file" accept="image/*" onChange="{{ uploadBgImage }}" style="display:none" /></label>
+                    <sc-if value="{{ adminBgImage }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ clearBgImage }}" style="border:1px solid #43292b;background:#2a1618;color:#e2706f;border-radius:9px;padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer;">Remove</button>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;">Style cards</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Card background</span><input type="color" value="{{ adminCardBg }}" onInput="{{ onAdminCardBg }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Selected background</span><input type="color" value="{{ adminCardSelectedBg }}" onInput="{{ onAdminCardSelectedBg }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Title color</span><input type="color" value="{{ adminCardTitleColor }}" onInput="{{ onAdminCardTitleColor }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Description color</span><input type="color" value="{{ adminCardDescColor }}" onInput="{{ onAdminCardDescColor }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                </div>
+                <div style="font-size:12.5px;color:#9498a0;margin:14px 0 8px;">Card font</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <sc-for list="{{ adminCardFonts }}" as="f" hint-placeholder-count="6">
+                    <button onClick="{{ f.pick }}" style="border:1px solid #2e3238;border-radius:10px;padding:8px 14px;font-size:15px;cursor:pointer;background:{{ f.bg }};color:{{ f.color }};font-family:{{ f.font }};">{{ f.name }}</button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;">Generate button</div>
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;">
+                  <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Background</span><input type="color" value="{{ adminPrimary }}" onInput="{{ onAdminPrimaryHex }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                  <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:12.5px;color:#9498a0;">Text</span><input type="color" value="{{ adminButtonTextColor }}" onInput="{{ onAdminButtonTextColor }}" style="width:42px;height:32px;border:none;background:none;cursor:pointer;" /></div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+                  <sc-for list="{{ adminButtonFonts }}" as="f" hint-placeholder-count="6">
+                    <button onClick="{{ f.pick }}" style="border:1px solid #2e3238;border-radius:10px;padding:8px 14px;font-size:15px;cursor:pointer;background:{{ f.bg }};color:{{ f.color }};font-family:{{ f.font }};">{{ f.name }}</button>
+                  </sc-for>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                  <label style="display:flex;align-items:center;gap:12px;font-size:12.5px;color:#9498a0;">Label<input value="{{ adminButtonLabel }}" onInput="{{ onAdminButtonLabel }}" style="flex:1;background:#0f1012;border:1px solid #2e3238;border-radius:9px;padding:9px 12px;font-size:14px;color:#fff;outline:none;" /></label>
+                  <label style="display:flex;align-items:center;gap:12px;font-size:12.5px;color:#9498a0;">Vertical padding<input type="range" min="6" max="34" value="{{ adminButtonPadV }}" onInput="{{ onAdminButtonPadV }}" style="flex:1;accent-color:#fff;" /><span style="width:42px;text-align:right;color:#cfd2d6;">{{ adminButtonPadV }}px</span></label>
+                  <label style="display:flex;align-items:center;gap:12px;font-size:12.5px;color:#9498a0;">Horizontal padding<input type="range" min="0" max="40" value="{{ adminButtonPadH }}" onInput="{{ onAdminButtonPadH }}" style="flex:1;accent-color:#fff;" /><span style="width:42px;text-align:right;color:#cfd2d6;">{{ adminButtonPadH }}px</span></label>
+                  <label style="display:flex;align-items:center;gap:12px;font-size:12.5px;color:#9498a0;">Corner radius<input type="range" min="0" max="40" value="{{ adminButtonRadius }}" onInput="{{ onAdminButtonRadius }}" style="flex:1;accent-color:#fff;" /><span style="width:42px;text-align:right;color:#cfd2d6;">{{ adminButtonRadius }}px</span></label>
+                </div>
+              </div>
+
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ adminSecurityTab }}" hint-placeholder-val="{{ false }}">
+            <div style="max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+              <div style="font-size:13px;font-weight:700;color:#fff;">Console password</div>
+              <div style="font-size:12.5px;color:#9498a0;line-height:1.5;">Password for the hidden entrance. Updates when you click Save.</div>
+              <input value="{{ adminPassword }}" onInput="{{ onAdminPassword }}" style="width:100%;box-sizing:border-box;background:#0f1012;border:1px solid #2e3238;border-radius:9px;padding:11px 13px;font-size:14px;color:#fff;outline:none;" />
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;primaryColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#16181a&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  // ▼▼▼ ADMIN CONFIG STORAGE — separate from generation. NOT api.tattty.com (that's Ink Me Up). ▼▼▼
+  // The address where YOUR admin settings + styles are saved and read from.
+  // This route must answer:  GET -> returns { settings, styles }   (read for every visitor)
+  //                         POST { settings, styles } -> stores it  (called by Save)
+  // Leave blank until you build it; then put that route's URL here.
+  CONFIG_ENDPOINT = '';
+  // ▲▲▲
+  // Single source of truth lives in models.js (window.GENERATION_MODELS).
+  // This inline list is only a fallback in case the file hasn't loaded yet.
+  get models(){ return (typeof window !== 'undefined' && window.GENERATION_MODELS) || this.fallbackModels; }
+  modelOutputs(m){ return Math.max(1, (m && (m.maxOutputs != null ? m.maxOutputs : m.maxOutput)) || 1); }
+  modelInputs(m){ return Math.max(1, (m && (m.maxInputs != null ? m.maxInputs : 1)) || 1); }
+
+  fallbackModels = [
+    { id: 'tattty-core', label: 'TaTTTy Core', maxInputs: 1, maxOutputs: 12, description: 'Balanced photo-to-art engine.' }
+  ];
+
+  // Single source of truth lives in tattoo-styles.js (window.TATTOO_STYLES).
+  // This inline list is only a fallback in case the file hasn't loaded yet.
+  get styles(){ return (typeof window !== 'undefined' && window.TATTOO_STYLES) || this.fallbackStyles; }
+  getPrompt(id){
+    if(id === '__no_style__') return '';
+    const f = this.styles.find(x => x.id === id);
+    if(f && f.prompt) return f.prompt;
+    if(typeof window !== 'undefined' && typeof window.findTattooStyle === 'function'){
+      const s = window.findTattooStyle(id);
+      if(s && s.prompt) return s.prompt;
+    }
+    return '';
+  }
+
+  fallbackStyles = [
+    { id:'risograph', label:'Risograph', description:'Vibrant neon overlays with grainy lo-fi print textures.' },
+    { id:'ukiyo-e', label:'Ukiyo-e', description:'Classic woodblock aesthetics with bold flat color planes.' },
+    { id:'infrared', label:'Infrared', description:'High-energy thermal heat maps in surreal neon palettes.' },
+    { id:'brutalism', label:'Vector Brutalism', description:'Jagged raw shapes and disruptive modern graphic energy.' },
+    { id:'alchemical-etch', label:'Alchemical Etch', description:'Delicate 17th-century occult ink on aged parchment.' },
+    { id:'american-traditional', label:'American Traditional', description:'Bold iconic tattoo imagery with timeless old-school punch.' },
+    { id:'japanese-irezumi', label:'Japanese Irezumi', description:'Flowing dramatic tattoo forms with classic Japanese power.' },
+    { id:'ornamental-filigree', label:'Ornamental Filigree', description:'Elegant ornamental linework with intricate decorative flow.' },
+    { id:'fine-line', label:'Fine Line', description:'Delicate minimal tattoo lines with subtle refined detail.' },
+    { id:'black-and-grey-realism', label:'Black & Grey Realism', description:'Smooth realistic shading with dramatic monochrome depth.' },
+    { id:'neo-traditional', label:'Neo Traditional', description:'Bold classic tattoo forms with rich modern color depth.' },
+    { id:'geometric-mandala', label:'Geometric Mandala', description:'Sacred symmetry with crisp linework and patterned balance.' },
+    { id:'micro-realism', label:'Micro Realism', description:'Tiny hyper-detailed realism with delicate precision focus.' },
+    { id:'chicano-black-grey', label:'Chicano Black & Grey', description:'Smooth black and grey drama with lowrider street soul.' },
+    { id:'cybersigilism', label:'Cybersigilism', description:'Sharp futuristic sigils with dark alien ornamental flow.' },
+    { id:'halftone-pop', label:'Halftone Pop', description:'Graphic Ben-Day dots for high-contrast newspaper vibes.' },
+    { id:'charcoal', label:'Charcoal', description:'Moody smudged carbon textures with raw hand-drawn soul.' },
+    { id:'watercolor', label:'Watercolor', description:'Airy brushwork and delicate pastel atmosphere.' },
+    { id:'anime', label:'Anime', description:'Soft cinematic anime look with painterly light.' },
+    { id:'trash-polka', label:'Trash Polka', description:'Aggressive red and black collage with chaotic brushstrokes.' },
+    { id:'ignorant-tattoo', label:'Ignorant Style', description:'Raw, deliberate unpolished linework with a stark minimalism.' },
+    { id:'woodcut-engraving', label:'Woodcut Engraving', description:'Harsh parallel hatching and thick lines of medieval prints.' },
+    { id:'glitch-ink', label:'Glitch Ink', description:'Fragmented digital errors with chromatic offset line work.' },
+    { id:'biomechanical', label:'Biomechanical', description:'Fleshy machinery, metallic gears, and deep skin integration.' },
+    { id:'continuous-line', label:'Continuous Line', description:'Minimalist contour art formed by one single unbroken line.' },
+    { id:'heavy-blackwork', label:'Heavy Blackwork', description:'Massive solid black fills shaping crisp negative space art.' },
+    { id:'sketchwork', label:'Sketchwork', description:'Messy draftsman blueprints with rough, overlapping strokes.' },
+    { id:'stippling-dotwork', label:'Stippling Dotwork', description:'Smooth gradient shading built entirely from microscopic dots.' },
+    { id:'futuristic', label:'Futuristic', description:'Ethereal sci-fi glow with blue tones and futuristic cityscape.' },
+    { id:'cubist-fracture', label:'Cubist Fracture', description:'Sharp fractured geometry with layered multi-angle forms.' },
+    { id:'art-deco-luxe', label:'Art Deco Luxe', description:'Elegant geometric glamour with metallic symmetry and shine.' },
+    { id:'art-nouveau-bloom', label:'Art Nouveau Bloom', description:'Flowing ornamental curves with floral elegance and grace.' },
+    { id:'fauvist-flame', label:'Fauvist Flame', description:'Wild expressive color with bold painterly emotional energy.' },
+    { id:'surreal-dreamscape', label:'Surreal Dreamscape', description:'Dreamlike symbolism with uncanny space and lucid atmosphere.' },
+    { id:'bauhaus-grid', label:'Bauhaus Grid', description:'Clean geometric structure with bold modern design order.' },
+    { id:'op-art-pulse', label:'Op Art Pulse', description:'Hypnotic optical patterns with vibrating visual movement.' },
+    { id:'constructivist-poster', label:'Constructivist Poster', description:'Angular poster drama with striking industrial graphic force.' },
+    { id:'photoreal-chrome', label:'Photoreal Chrome', description:'Ultra-detailed realism with polished reflections and gloss.' },
+    { id:'precisionist-steel', label:'Precisionist Steel', description:'Machine-age clarity with crisp industrial forms and depth.' },
+    { id:'pointillist-glow', label:'Pointillist Glow', description:'Shimmering color built from dense luminous dotted texture.' },
+    { id:'isometric-world', label:'Isometric World', description:'Stylized spatial depth with clean geometric dimensionality.' },
+    { id:'magical-realism', label:'Magical Realism', description:'Real-world beauty with subtle impossible dreamlike detail.' },
+    { id:'kinetic-motion', label:'Kinetic Motion', description:'Rhythmic speed trails with layered energy and momentum.' },
+    { id:'vorticist-shards', label:'Vorticist Shards', description:'Hard-edged abstraction with vortex tension and force.' },
+    { id:'color-field-aura', label:'Color Field Aura', description:'Soft atmospheric color masses with emotional tonal depth.' },
+    { id:'suprematist-minimal', label:'Suprematist Minimal', description:'Pure abstract geometry with stark minimal visual power.' },
+    { id:'lightform-zero', label:'Lightform Zero', description:'Minimal glowing light sculptures with sleek futuristic calm.' },
+    { id:'psychedelic-poster', label:'Psychedelic Poster', description:'Swirling retro color with warped hallucinatory intensity.' },
+    { id:'grunge-collage', label:'Grunge Collage', description:'Torn layered textures with dirty graphic rebellious energy.' },
+    { id:'cyberpunk', label:'Cyberpunk', description:'Gritty neon-drenched urban sprawl with high-tech chrome visuals.' },
+    { id:'lofi-comic', label:'Lo-Fi Comic', description:'Graphic comic style with bold lines and soft retro colors.' }
+  ];
+
+  filterMap = {
+    'charcoal':'grayscale(1) contrast(1.45) brightness(1.05)',
+    'anime':'saturate(1.6) contrast(1.08) brightness(1.06)',
+    'trash-polka':'grayscale(.5) saturate(2.4) contrast(1.5) hue-rotate(-12deg)',
+    'ignorant-tattoo':'grayscale(1) contrast(2.3) brightness(1.18)',
+    'watercolor':'saturate(1.35) brightness(1.12) contrast(.92) blur(.5px)',
+    'infrared':'saturate(3) hue-rotate(175deg) contrast(1.4)',
+    'black-and-grey-realism':'grayscale(1) contrast(1.2)',
+    'chicano-black-grey':'grayscale(1) contrast(1.28) brightness(1.04)',
+    'cyberpunk':'saturate(2.4) hue-rotate(-25deg) contrast(1.3) brightness(1.05)',
+    'futuristic':'saturate(1.8) hue-rotate(160deg) contrast(1.15) brightness(1.1)',
+    'woodcut-engraving':'grayscale(1) contrast(2) brightness(1.1)',
+    'heavy-blackwork':'grayscale(1) contrast(2.6) brightness(.95)',
+    'continuous-line':'grayscale(1) contrast(2.4) brightness(1.2)',
+    'stippling-dotwork':'grayscale(1) contrast(1.5) brightness(1.08)',
+    'risograph':'saturate(2.2) contrast(1.25) hue-rotate(-18deg) brightness(1.05)',
+    'ukiyo-e':'saturate(1.4) contrast(1.15) sepia(.18)',
+    'halftone-pop':'grayscale(.3) contrast(1.6) saturate(1.8)',
+    'neo-traditional':'saturate(1.7) contrast(1.18)',
+    'fine-line':'grayscale(1) contrast(1.55) brightness(1.2)',
+    'glitch-ink':'saturate(2) hue-rotate(40deg) contrast(1.35)',
+    'biomechanical':'grayscale(.7) contrast(1.4) brightness(.92)',
+    'psychedelic-poster':'saturate(2.6) hue-rotate(70deg) contrast(1.25)',
+    'pointillist-glow':'saturate(1.6) brightness(1.12) blur(.4px)',
+    'fauvist-flame':'saturate(2.4) hue-rotate(-30deg) contrast(1.2)',
+    'surreal-dreamscape':'saturate(1.5) hue-rotate(20deg) brightness(1.1) contrast(1.05)',
+    'photoreal-chrome':'contrast(1.2) saturate(1.1) brightness(1.05)',
+    'alchemical-etch':'sepia(.6) grayscale(.4) contrast(1.35) brightness(1.05)',
+    'sketchwork':'grayscale(1) contrast(1.7) brightness(1.15)'
+  };
+
+  promptFilters = [
+    'contrast(1.15) saturate(1.25)',
+    'grayscale(1) contrast(1.4)',
+    'saturate(1.9) hue-rotate(-22deg) contrast(1.2)',
+    'saturate(1.45) brightness(1.1) blur(.4px)',
+    'sepia(.4) contrast(1.25)',
+    'grayscale(.4) saturate(2.1) contrast(1.3)',
+    'hue-rotate(150deg) saturate(1.8) contrast(1.2)',
+    'contrast(1.9) brightness(1.15) grayscale(.6)',
+    'saturate(2.4) hue-rotate(60deg)',
+    'brightness(1.08) contrast(1.3) saturate(1.4)',
+    'grayscale(1) contrast(2.1) brightness(1.1)',
+    'sepia(.25) saturate(1.6) contrast(1.15)'
+  ];
+
+  state = {
+    view: 'create',
+    imageSrc: null,
+    selected: [],
+    prompt: '',
+    variations: 4,
+    outputs: 1,
+    genError: '',
+    genMessage: '',
+    createNotice: '',
+    modelId: 'tattty-core',
+    cameraOn: false,
+    cameraError: '',
+    secretModal: false,
+    secretPwd: '',
+    secretError: '',
+    secretPage: false,
+    adminTab: 'styles',
+    adminSaved: false,
+    adminError: '',
+    adminSaving: false,
+    draftStyles: null,
+    draftSettings: null,
+    settings: (function(){
+      var d = {
+        primaryColor:'#16181a', buttonTextColor:'#ffffff', buttonFont:'Rock Salt', buttonLabel:'Ink Me Up',
+        buttonPadV:16, buttonPadH:14, buttonRadius:14,
+        bgType:'color', bgColor:'#ffffff', bgImage:'',
+        cardBg:'#f7f7f8', cardSelectedBg:'#ececec', cardTitleColor:'#141414', cardDescColor:'#8b8f96', cardFont:'Poppins',
+        password:'tatttyadmin'
+      };
+      try { return Object.assign(d, (typeof window!=='undefined' && window.TATTTY_CONFIG && window.TATTTY_CONFIG.settings) || {}); } catch(e){ return d; }
+    })(),
+    userStyles: (function(){
+      try { var s = (typeof window!=='undefined' && window.TATTTY_CONFIG && window.TATTTY_CONFIG.styles); return Array.isArray(s) ? s : null; } catch(e){ return null; }
+    })(),
+    results: []
+  };
+
+  // Hidden entrance: triple-click the "No Style" card -> password modal -> secret page.
+  SECRET_PASSWORD = 'tatttyadmin';
+  secretClick = () => {
+    this._secretCount = (this._secretCount || 0) + 1;
+    clearTimeout(this._secretTimer);
+    if(this._secretCount >= 3){
+      this._secretCount = 0;
+      this.setState({ secretModal: true, secretPwd: '', secretError: '' });
+    } else {
+      this._secretTimer = setTimeout(() => { this._secretCount = 0; }, 600);
+    }
+  };
+  noStyleClick = () => { this.toggleStyle('__no_style__'); this.secretClick(); };
+  onSecretPwd = (e) => this.setState({ secretPwd: e.target.value, secretError: '' });
+  submitSecret = () => {
+    if(this.state.secretPwd === this.state.settings.password){
+      this.setState({
+        secretModal: false, secretPage: true, secretPwd: '', secretError: '',
+        adminTab: 'styles', adminSaved: false, adminError: '',
+        draftSettings: Object.assign({}, this.state.settings),
+        draftStylesJson: JSON.stringify((this.state.userStyles || this.styles).map(s => ({ id: s.id, label: s.label, description: s.description, prompt: s.prompt || '' })), null, 2)
+      });
+    } else {
+      this.setState({ secretError: 'Incorrect password' });
+    }
+  };
+  setAdminTab = (tab) => this.setState({ adminTab: tab, adminSaved: false, adminError: '' });
+  editStyleField = (i, field, value) => this.setState(s => { const d = s.draftStyles.slice(); d[i] = Object.assign({}, d[i], { [field]: value }); return { draftStyles: d, adminSaved: false }; });
+  deleteStyle = (i) => this.setState(s => { const d = s.draftStyles.slice(); d.splice(i, 1); return { draftStyles: d, adminSaved: false }; });
+  addStyle = () => this.setState(s => ({ draftStyles: s.draftStyles.concat([{ id: 'custom-' + Date.now(), label: 'New Style', description: '', prompt: '', font: '', color: '' }]), adminSaved: false }));
+  uploadBgImage = (e) => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = () => this.setState(s => ({ draftSettings: Object.assign({}, s.draftSettings, { bgImage: r.result, bgType: 'image' }), adminSaved: false }));
+    r.readAsDataURL(f);
+    e.target.value = '';
+  };
+  clearBgImage = () => this.editSetting('bgImage', '');
+  onStylesJson = (e) => this.setState({ draftStylesJson: e.target.value, adminSaved: false, adminError: '' });
+  editSetting = (key, value) => this.setState(s => ({ draftSettings: Object.assign({}, s.draftSettings, { [key]: value }), adminSaved: false, adminError: '' }));
+  // Persists the whole config to YOUR backend. Set window.TATTTY_CONFIG_SAVE_URL to the
+  // endpoint that accepts POST { settings, styles } and stores it for every visitor
+  // (Hydrogen action, Vercel/Railway API route, etc). Read back by injecting the stored
+  // value as window.TATTTY_CONFIG = { settings, styles } when the page loads.
+  saveAdmin = async () => {
+    const settings = Object.assign({}, this.state.draftSettings);
+    let styles;
+    try {
+      styles = JSON.parse(this.state.draftStylesJson);
+      if(!Array.isArray(styles)) throw new Error('Styles JSON must be an array');
+      for(const s of styles){ if(!s || !s.id || !s.label) throw new Error('Every style needs at least an "id" and "label"'); }
+    } catch(e){
+      this.setState({ adminError: 'Invalid styles JSON — ' + ((e && e.message) ? e.message : String(e)) });
+      return;
+    }
+    const url = this.CONFIG_ENDPOINT;
+    const validIds = new Set(styles.map(s => s.id));
+    // Apply to the live generator immediately and keep it on this machine so it survives reload.
+    try { localStorage.setItem('tattty_admin_config', JSON.stringify({ settings, styles })); } catch(err){}
+    this.setState(st => ({ settings, userStyles: styles, adminSaved: true, adminSaving: false, adminError: '', selected: st.selected.filter(id => validIds.has(id)) }));
+    // If a backend address is set, also push there. Otherwise we're done.
+    if(url){
+      try {
+        const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ settings, styles }) });
+        if(!res.ok){ const t = await res.text().catch(()=>''); this.setState({ adminError: 'Saved here, but remote save failed (' + res.status + ')' + (t ? ': ' + t.slice(0,160) : '') }); }
+      } catch(err){ this.setState({ adminError: 'Saved here, but remote save failed: ' + ((err && err.message) ? err.message : String(err)) }); }
+    }
+  };
+  secretKey = (e) => { if(e.key === 'Enter') this.submitSecret(); };
+  lbStop = (e) => { if(e && e.stopPropagation) e.stopPropagation(); };
+  closeSecretModal = () => this.setState({ secretModal: false, secretPwd: '', secretError: '' });
+  exitSecretPage = () => this.setState({ secretPage: false });
+
+  get currentModel(){ return this.models.find(m => m.id === this.state.modelId) || this.models[0]; }
+  get maxSelectable(){ return this.modelOutputs(this.currentModel); }
+  get promptMode(){ return this.state.prompt.trim().length > 0; }
+  get primary(){ return (this.state.settings && this.state.settings.primaryColor) || '#16181a'; }
+  get styles(){ return this.state.userStyles || (typeof window !== 'undefined' && window.TATTOO_STYLES) || this.fallbackStyles; }
+  get canGenerate(){
+    // Typed prompt alone is valid (no image needed). A chosen style requires an image.
+    if(this.promptMode) return true;
+    if(this.state.selected.length > 0) return !!this.state.imageSrc;
+    return false;
+  }
+
+  toggleStyle = (id) => {
+    if(this.promptMode) return;
+    this.setState(s => ({ selected: s.selected.includes(id) ? [] : [id], createNotice: '' }));
+  };
+
+  onPrompt = (e) => this.setState({ prompt: e.target.value, createNotice: '' });
+  onModel = (e) => this.setState({ modelId: e.target.value, selected: [] });
+  setVariations = (d) => this.setState(s => ({ variations: Math.max(1, Math.min(this.maxSelectable, s.variations + d)) }));
+  setOutputs = (d) => this.setState(s => ({ outputs: Math.max(1, Math.min(4, (s.outputs || 1) + d)) }));
+
+  triggerUpload = () => { if(this.fileInputRef && this.fileInputRef.current) this.fileInputRef.current.click(); };
+  onFile = (e) => { const f = e.target.files && e.target.files[0]; if(f){ this._file = f; this.readFile(f); } e.target.value = ''; };
+  readFile = (f) => { const r = new FileReader(); r.onload = () => this.setState({ imageSrc: r.result, cameraOn: false, createNotice: '' }); r.readAsDataURL(f); };
+  onDrop = (e) => { e.preventDefault(); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f && f.type.indexOf('image/') === 0){ this._file = f; this.readFile(f); } };
+  onDragOver = (e) => e.preventDefault();
+  removeImage = () => { this._file = null; this.setState({ imageSrc: null }); };
+  setOutputs = (n) => this.setState({ outputs: Math.max(1, Math.min(4, n)) });
+
+  // Hidden fields from the page (Shopify Liquid). version is a metafield.
+  // Hidden fields, passed into the iframe URL by Shopify Liquid:
+  //   ...index.html?customer_id={{ customer.id }}&version={{ product.metafields.custom.version }}
+  // Whatever is in the URL is sent as-is. If it's missing, the empty value still goes to
+  // the backend, which returns its own verbatim message (not swallowed here).
+  get customerId(){
+    return new URLSearchParams(window.location.search).get('customer_id') || '';
+  }
+  get version(){
+    return new URLSearchParams(window.location.search).get('version') || '';
+  }
+
+  startCamera = async () => {
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      this.setState({ cameraOn: true, cameraError: '' });
+    } catch(err) {
+      this.setState({ cameraError: 'Camera unavailable here — upload or drag a photo instead.' });
+    }
+  };
+  attachVideo = (n) => {
+    this._video = n;
+    if(n && this.stream){ n.srcObject = this.stream; n.muted = true; n.playsInline = true; if(n.play) n.play().catch(()=>{}); }
+  };
+  capture = () => {
+    const v = this._video; if(!v) return;
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth || 720; c.height = v.videoHeight || 960;
+    c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+    this.stopCamera();
+    const src = c.toDataURL('image/png');
+    if(c.toBlob){
+      c.toBlob((blob) => { this._file = blob ? new File([blob], 'photo.png', { type: 'image/png' }) : null; this.setState({ imageSrc: src, cameraOn: false }); }, 'image/png');
+    } else {
+      this.setState({ imageSrc: src, cameraOn: false });
+    }
+  };
+  stopCamera = () => { if(this.stream){ this.stream.getTracks().forEach(t => t.stop()); this.stream = null; } };
+  cancelCamera = () => { this.stopCamera(); this.setState({ cameraOn: false }); };
+  componentDidMount(){
+    // Load settings saved on this machine so they persist across reloads.
+    try {
+      const saved = JSON.parse(localStorage.getItem('tattty_admin_config') || 'null');
+      if(saved){
+        const next = {};
+        if(saved.settings) next.settings = Object.assign({}, this.state.settings, saved.settings);
+        if(Array.isArray(saved.styles)) next.userStyles = saved.styles;
+        if(Object.keys(next).length) this.setState(next);
+      }
+    } catch(err){}
+    // Load saved admin config (settings + styles) from your backend so every visitor
+    // sees what you last saved. Falls through to built-in defaults only if it can't load.
+    if(this.CONFIG_ENDPOINT){
+      fetch(this.CONFIG_ENDPOINT, { method: 'GET' })
+        .then(r => r.ok ? r.json() : null)
+        .then(cfg => {
+          if(!cfg) return;
+          const next = {};
+          if(cfg.settings) next.settings = Object.assign({}, this.state.settings, cfg.settings);
+          if(Array.isArray(cfg.styles)) next.userStyles = cfg.styles;
+          if(Object.keys(next).length) this.setState(next);
+        })
+        .catch(() => {});
+    }
+    // If the data files load after first paint, refresh once they're ready.
+    if(typeof window !== 'undefined' && (!window.TATTOO_STYLES || !window.GENERATION_MODELS)){
+      let tries = 0;
+      this._stylesPoll = setInterval(() => {
+        tries++;
+        if(window.TATTOO_STYLES && window.GENERATION_MODELS){ clearInterval(this._stylesPoll); this.forceUpdate(); }
+        else if(tries > 50){ clearInterval(this._stylesPoll); }
+      }, 100);
+    }
+  }
+  componentWillUnmount(){ this.stopCamera(); if(this._stylesPoll) clearInterval(this._stylesPoll); }
+
+  filterFor = (id, idx) => {
+    if(this.promptMode) return this.promptFilters[idx % this.promptFilters.length];
+    return this.filterMap[id] || 'contrast(1.12) saturate(1.18)';
+  };
+
+  generate = async () => {
+    // Always clickable — guide with a quick message when something's missing.
+    if(!this.promptMode && this.state.selected.length === 0){
+      this.setState({ createNotice: 'Pick a style or write a prompt first.' });
+      return;
+    }
+    if(!this.promptMode && this.state.selected.length > 0 && !this.state.imageSrc){
+      this.setState({ createNotice: 'Please upload an image.' });
+      return;
+    }
+    if(!this.canGenerate) return;
+    this.setState({ createNotice: '' });
+    const prompt = this.promptMode
+      ? this.state.prompt.trim()
+      : (this.state.selected[0] ? this.getPrompt(this.state.selected[0]) : '');
+    const n = Math.max(1, Math.min(4, this.state.outputs || 1));
+    const items = Array.from({ length: n }, (_, i) => ({ key: 'o' + i, label: 'Output #' + (i + 1), status: 'loading', src: null, filter: 'none' }));
+    this.setState({ view: 'results', results: items, genMessage: '' });
+    this.runGeneration(prompt, n);
+  };
+
+  // Two calls, in order, no validation, no fallback:
+  // 1) POST the file to the upload worker -> image URL
+  // 2) POST { customer_id, version, numOutputs, prompt, uploads } to api.tattty.com -> image URLs
+  runGeneration = async (prompt, n) => {
+    try {
+      // Upload only if there is an image. A typed prompt with no photo sends no upload.
+      let imageUrl = '';
+      if(this._file){
+        const fd = new FormData();
+        fd.append('file', this._file, this._file.name);
+        const up = await fetch('https://model.avi-kay2019.workers.dev', { method: 'POST', body: fd });
+        const upData = await up.json();
+        imageUrl = upData.url || upData.imageUrl || upData.uploads || '';
+      }
+
+      const res = await fetch('https://api.tattty.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(180000),
+        body: JSON.stringify({
+          customer_id: this.customerId,
+          version: this.version,
+          numOutputs: n,
+          prompt: prompt,
+          uploads: imageUrl
+        })
+      });
+      const data = await res.json();
+      const urls = (data && (data.urls || data.images || data.output)) || (Array.isArray(data) ? data : []);
+      // Mailbox: render whatever URLs came back, and show the backend's message verbatim if it sent one. Never author.
+      const msg = (data && typeof data === 'object') ? (data.message || data.error || data.msg || '') : (typeof data === 'string' ? data : '');
+      this.setState(s => ({ results: s.results.map((it, i) => ({ ...it, status: 'done', src: urls[i] || null })), genMessage: msg }));
+    } catch(e) {
+      // 3-minute ceiling: if nothing came back by then, something is wrong.
+      const timedOut = e && (e.name === 'TimeoutError' || e.name === 'AbortError');
+      this.setState(s => ({
+        results: s.results.map(it => ({ ...it, status: 'done', src: null })),
+        genMessage: timedOut ? 'Timed out — this took too long. Please try again.' : ''
+      }));
+    }
+  };
+
+  createAnother = () => this.setState({ view: 'create', results: [] });
+
+  download = async (item) => {
+    if(!item.src) return;
+    try {
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = item.src; });
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth || 800; c.height = img.naturalHeight || 1000;
+      const ctx = c.getContext('2d');
+      ctx.filter = item.filter || 'none';
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/png');
+      a.download = ('tattty-' + item.label).replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+      a.click();
+    } catch(e) {
+      const a = document.createElement('a'); a.href = item.src; a.download = 'tattty.png'; a.click();
+    }
+  };
+
+  renderVals(){
+    const S = this.state.settings;
+    const sel = new Set(this.state.selected);
+    const disabledList = this.promptMode;
+    const mkCard = (s, selected) => ({
+      id: s.id, label: s.label, description: s.description,
+      bg: selected ? S.cardSelectedBg : S.cardBg,
+      border: selected ? '1.5px solid ' + (s.color || S.primaryColor) : '1px solid #ededf0',
+      shadow: selected ? '0 4px 14px -6px rgba(0,0,0,.18)' : 'none',
+      titleColor: s.color || S.cardTitleColor,
+      descColor: S.cardDescColor,
+      font: "'" + (s.font || S.cardFont) + "', sans-serif",
+      opacity: disabledList ? '0.4' : '1',
+      pe: disabledList ? 'none' : 'auto',
+      toggle: () => this.toggleStyle(s.id)
+    });
+    const styleCards = this.styles.map(s => mkCard(s, sel.has(s.id)));
+    const noStyleSel = sel.has('__no_style__');
+    const noStyleCard = mkCard({ id: '__no_style__', label: 'No Style', description: 'Skip the presets and generate your image with no style applied.' }, noStyleSel);
+    noStyleCard.toggle = this.noStyleClick;
+    styleCards.push(noStyleCard);
+    const results = this.state.results.map(it => ({
+      key: it.key, label: it.label, src: it.src, filter: it.filter,
+      loading: it.status === 'loading', done: it.status === 'done',
+      imgEl: it.status === 'done'
+        ? React.createElement('img', { src: it.src, alt: it.label, style: { width: '100%', height: '100%', objectFit: 'cover', filter: it.filter, display: 'block' } })
+        : null,
+      download: () => this.download(it)
+    }));
+    const cm = this.currentModel;
+    const primary = this.primary;
+    const ds = this.state.draftSettings || this.state.settings;
+    const fontOptions = ['Rock Salt', 'Poppins', 'Bebas Neue', 'Oswald', 'Permanent Marker', 'Pacifico'];
+    const appBg = (S.bgType === 'image' && S.bgImage) ? ('#fff url(' + S.bgImage + ') center/cover no-repeat') : S.bgColor;
+    const bgFonts = (sel2, key) => fontOptions.map(f => ({
+      name: f, font: "'" + f + "', sans-serif",
+      bg: (ds && ds[key] === f) ? '#16181a' : '#fff',
+      color: (ds && ds[key] === f) ? '#fff' : '#141414',
+      pick: () => this.editSetting(key, f)
+    }));
+    return {
+      isCreate: this.state.view === 'create',
+      isResults: this.state.view === 'results',
+      genFont: "'" + (S.buttonFont || 'Rock Salt') + "', sans-serif",
+      genTextColor: S.buttonTextColor || '#ffffff',
+      genRadius: (S.buttonRadius != null ? S.buttonRadius : 14) + 'px',
+      genPad: (S.buttonPadV != null ? S.buttonPadV : 16) + 'px ' + (S.buttonPadH != null ? S.buttonPadH : 14) + 'px',
+      appBg,
+      adminTab: this.state.adminTab,
+      adminStylesTab: this.state.adminTab === 'styles',
+      adminAppearanceTab: this.state.adminTab === 'appearance',
+      adminSecurityTab: this.state.adminTab === 'security',
+      stylesTabBg: this.state.adminTab === 'styles' ? '#16181a' : 'transparent',
+      stylesTabColor: this.state.adminTab === 'styles' ? '#fff' : '#7c8088',
+      appearanceTabBg: this.state.adminTab === 'appearance' ? '#16181a' : 'transparent',
+      appearanceTabColor: this.state.adminTab === 'appearance' ? '#fff' : '#7c8088',
+      securityTabBg: this.state.adminTab === 'security' ? '#16181a' : 'transparent',
+      securityTabColor: this.state.adminTab === 'security' ? '#fff' : '#7c8088',
+      adminButtonFonts: bgFonts(null, 'buttonFont'),
+      adminCardFonts: bgFonts(null, 'cardFont'),
+      adminPrimary: ds && ds.primaryColor,
+      adminButtonTextColor: ds && ds.buttonTextColor,
+      adminButtonLabel: ds && ds.buttonLabel,
+      adminButtonPadV: ds && ds.buttonPadV,
+      adminButtonPadH: ds && ds.buttonPadH,
+      adminButtonRadius: ds && ds.buttonRadius,
+      adminBgType: ds && ds.bgType,
+      adminBgColor: ds && ds.bgColor,
+      adminBgImage: ds && ds.bgImage,
+      adminBgIsImage: !!(ds && ds.bgType === 'image'),
+      adminBgIsColor: !(ds && ds.bgType === 'image'),
+      bgColorModeBg: !(ds && ds.bgType === 'image') ? '#16181a' : 'transparent',
+      bgColorModeColor: !(ds && ds.bgType === 'image') ? '#fff' : '#7c8088',
+      bgImageModeBg: (ds && ds.bgType === 'image') ? '#16181a' : 'transparent',
+      bgImageModeColor: (ds && ds.bgType === 'image') ? '#fff' : '#7c8088',
+      adminCardBg: ds && ds.cardBg,
+      adminCardSelectedBg: ds && ds.cardSelectedBg,
+      adminCardTitleColor: ds && ds.cardTitleColor,
+      adminCardDescColor: ds && ds.cardDescColor,
+      adminPassword: ds && ds.password,
+      adminSaved: this.state.adminSaved,
+      adminError: this.state.adminError,
+      adminSaving: this.state.adminSaving,
+      saveLabel: this.state.adminSaving ? 'Saving…' : 'Save changes',
+      stylesJson: this.state.draftStylesJson,
+      onStylesJson: this.onStylesJson,
+      onAdminPrimaryHex: (e) => this.editSetting('primaryColor', e.target.value),
+      onAdminButtonTextColor: (e) => this.editSetting('buttonTextColor', e.target.value),
+      onAdminButtonLabel: (e) => this.editSetting('buttonLabel', e.target.value),
+      onAdminButtonPadV: (e) => this.editSetting('buttonPadV', parseInt(e.target.value, 10)),
+      onAdminButtonPadH: (e) => this.editSetting('buttonPadH', parseInt(e.target.value, 10)),
+      onAdminButtonRadius: (e) => this.editSetting('buttonRadius', parseInt(e.target.value, 10)),
+      onAdminBgColor: (e) => this.editSetting('bgColor', e.target.value),
+      onAdminCardBg: (e) => this.editSetting('cardBg', e.target.value),
+      onAdminCardSelectedBg: (e) => this.editSetting('cardSelectedBg', e.target.value),
+      onAdminCardTitleColor: (e) => this.editSetting('cardTitleColor', e.target.value),
+      onAdminCardDescColor: (e) => this.editSetting('cardDescColor', e.target.value),
+      onAdminPassword: (e) => this.editSetting('password', e.target.value),
+      setBgColorMode: () => this.editSetting('bgType', 'color'),
+      setBgImageMode: () => this.editSetting('bgType', 'image'),
+      uploadBgImage: this.uploadBgImage,
+      clearBgImage: this.clearBgImage,
+      tabStyles: () => this.setAdminTab('styles'),
+      tabAppearance: () => this.setAdminTab('appearance'),
+      tabSecurity: () => this.setAdminTab('security'),
+      saveAdmin: this.saveAdmin,
+      secretModal: this.state.secretModal,
+      secretPwd: this.state.secretPwd,
+      secretError: this.state.secretError,
+      secretPage: this.state.secretPage,
+      onSecretPwd: this.onSecretPwd,
+      submitSecret: this.submitSecret,
+      secretKey: this.secretKey,
+      closeSecretModal: this.closeSecretModal,
+      exitSecretPage: this.exitSecretPage,
+      lbStop: this.lbStop,
+      hasImage: !!this.state.imageSrc,
+      imageSrc: this.state.imageSrc,
+      imageEl: this.state.imageSrc
+        ? React.createElement('img', { src: this.state.imageSrc, alt: 'upload', style: { maxWidth: '100%', maxHeight: '70vh', borderRadius: '16px', objectFit: 'contain', boxShadow: '0 12px 34px -20px rgba(0,0,0,.35)' } })
+        : null,
+      showUploadPrompt: !this.state.imageSrc && !this.state.cameraOn,
+      showCamera: this.state.cameraOn,
+      cameraError: this.state.cameraError,
+      prompt: this.state.prompt,
+      promptMode: this.promptMode,
+      promptHint: this.promptMode
+        ? 'Custom prompt active — style presets are disabled.'
+        : 'AI makes mistakes please double check your request',
+      variations: this.state.variations,
+      styleCards,
+      models: this.models.map(m => ({ id: m.id, optionLabel: (m.label || m.name) + ' · ' + this.modelOutputs(m) + ' out' })),
+      modelId: this.state.modelId,
+      modelName: cm.label || cm.name,
+      ioText: 'Max inputs: ' + this.modelInputs(cm) + '   ·   Max outputs: ' + this.modelOutputs(cm),
+      counterText: this.promptMode
+        ? (this.state.variations + ' / ' + this.maxSelectable + ' variations')
+        : (this.state.selected.length + ' / 1 selected'),
+      generateDisabled: false,
+      noticeText: this.state.createNotice || (this.promptMode ? 'Custom prompt active — style presets are disabled.' : 'AI makes mistakes please double check your request'),
+      noticeColor: this.state.createNotice ? '#c0392b' : '#8b8f96',
+      noticeWeight: this.state.createNotice ? '600' : '400',
+      genLabel: !this.state.imageSrc
+        ? (this.state.settings.buttonLabel || 'Ink Me Up')
+        : (this.promptMode || this.state.selected.length > 0 ? (this.state.settings.buttonLabel || 'Ink Me Up') : 'Pick a style'),
+      genBg: primary,
+      genCursor: 'pointer',
+      genBgSolid: primary,
+      results,
+      fileInputRef: this.fileInputRef,
+      attachVideo: this.attachVideo,
+      onPrompt: this.onPrompt,
+      onModel: this.onModel,
+      triggerUpload: this.triggerUpload,
+      onFile: this.onFile,
+      onDrop: this.onDrop,
+      onDragOver: this.onDragOver,
+      removeImage: this.removeImage,
+      startCamera: this.startCamera,
+      capture: this.capture,
+      cancelCamera: this.cancelCamera,
+      generate: this.generate,
+      createAnother: this.createAnother,
+      incVar: () => this.setVariations(1),
+      decVar: () => this.setVariations(-1),
+      outputs: this.state.outputs || 1,
+      genMessage: this.state.genMessage,
+      incOut: () => this.setOutputs(1),
+      decOut: () => this.setOutputs(-1)
+    };
+  }
+
+  constructor(props){
+    super(props);
+    this.fileInputRef = React.createRef();
+  }
+}
+</script>
+</body>
+</html>
